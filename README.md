@@ -10,12 +10,27 @@
 
 ## コマンドラインオプション
 
-```
+```
+ws.
 
+Usage:
+  ws init
+  ws shell <profile>
+  ws exec  <profile> <command> [<args>]
+  ws show
+  ws (-h | --help)
+  ws --version
 
+Options:
+  init          create .workspaces folder
+  shell         open terminal with profile
+  exec          execute application with profile
+  <profile>     profile name(without .yml)    
+  <args>        execute application's arguments.
+  -h --help     Show this screen.
+  --version     Show version. 
 
 ```
-
 
 ## 設定ファイルの仕様
 
@@ -157,13 +172,7 @@ ws shell jdk17.yml
 java version "1.7.0_141"
 
 (jdk17)$ javac Hello.java
-P
 ```
-
-
-
-```
-
 
 ## Linux/Mac系で動作させる場合
 
