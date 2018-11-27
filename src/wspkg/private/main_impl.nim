@@ -50,14 +50,13 @@ proc getProfilePath(path:string) : string =
     return
 
   when defined(window):
-    root = getEnv("USERPROFILE",os.getCurrentDir()) / ".workspace"
+    root = getEnv("USERPROFILE",os.getCurrentDir()) / ".workspaces"
   else:
-    root = getEnv("HOME",os.getCurrentDir()) / ".workspace"
+    root = getEnv("HOME",os.getCurrentDir()) / ".workspaces"
 
   result = root / path
   if result.existsFile == false:
-    var
-      e: ref OSError
+    var e: ref OSError
     new(e)
     e.msg = "file not found =>" & result
     raise e
@@ -103,3 +102,57 @@ proc remove* (env: StringTableRef, keys: openArray[string]) : StringTableRef =
   for item in env.pairs :
     if keys.contains(item.key) == false :
       result[item.key] = item.value
+
+proc writeText(fileName:string, text: string) : bool =
+  result = true
+
+  var f : File = open(fileName ,FileMode.fmWrite)
+  defer :
+    close(f)
+  f.writeLine text
+
+proc createWorkspacesForlder* () : int =
+  result = 0
+  var root = ""
+  var yaml = ""
+  var note = """# insert this text into your shell's profile at end.
+# from here
+if [ "$WORKSPACE_NAME != "" ]; then
+  PROMPT="(${WORKSPACE_NAME})${PROMPT}"
+  export PATH=${WORKSPACE_PATH}
+fi
+"""
+  var userHome = "HOME"
+
+  when defined(window):
+    userHome = "USERPROFILE"
+    root = getEnv(userHome,"undefined")
+    yaml = "env:\r\n  WORKSPACE_SHELL: start"
+    note = ""
+  when defined(macosx):
+    root = getEnv(userHome,"undefined") 
+    yaml = "env:\n  WORKSPACE_SHELL: open\n  WORKSPACE_SHELL_ARGS: -na Terminal"
+  when defined(linux):
+    root = getEnv(userHome,"undefined")
+    yaml = "env:\n  WORKSPACE_SHELL: /usr/bin/gnome-terminal"
+
+  if root == "undefined" :
+    result = 1
+    echo "env '" & userHome & "' was not defined."
+    echo "process was aborted."
+    return
+
+  root = root / ".workspaces"
+  if root.existsDir() == false :
+    root.createDir()
+    echo root & "was created."
+
+  # base.ymlを出力
+  if (root / "base.yml").existsFile == false:
+    if writeText(root / "base.yml", yaml) :
+      echo root / "base.yml was created."
+    else:
+      result = 1
+      echo root / "base.yml was not created."
+  
+  echo note

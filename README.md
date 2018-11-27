@@ -22,9 +22,10 @@ Usage:
   ws --version
 
 Options:
-  init          create .workspaces folder
-  shell         open terminal with profile
-  exec          execute application with profile
+  init          create ${HONE}.workspaces folder.
+  shell         open terminal with profile.
+  exec          execute application with profile.
+  show          show current envoironments Yaml format.
   <profile>     profile name(without .yml)    
   <args>        execute application's arguments.
   -h --help     Show this screen.
@@ -32,17 +33,26 @@ Options:
 
 ```
 
-## 設定ファイルの仕様
+| コマンド名 | 説明 |
+| -------- | ---- |
+| init   | 初期化コマンドです。ホームディレクトリ配下に.workspacesフォルダを生成します |
+| shell | プロファイル名を指定して、ターミナルをオープンします |
+| exec | プロファイル名を指定して、アプリケーションを実行します |
+| show | 現在の環境変数をYaml形式で出力します |
+
+* プロファイル名は、Yamlファイルの拡張子(.yml)を取り除いたファイル名を指定します。
+
+## プロファイル(設定ファイル)の仕様について
 
 * Yaml形式で記述します。
 * パス区切り(：や；)で記述する環境変数は、Yamlの配列表記が可能です。
 * Yaml内で別の変数への参照(プレースホルダ)が利用できます。
 * 別のYamlファイルを取り込むことができます。
-  * 共通設定情報等を記述します。
+  * 共通設定情報等を記述します。
 
 ### Yaml形式
 
-* envセクション配下にハッシュ形式で変数名と値を記述します。
+* envセクション配下にハッシュ(キー：値)形式で環境変数名と値を記述します。
 * PATH等のパス区切りを設定する変数については、Yamlの配列表現にて記述することもできます。
 
 ```
@@ -57,10 +67,23 @@ env:
     - (PATH)
 ```
 
+* PATHの表記は以下でも同等の記述となります。
+
+```
+env:
+  WORKSPACE_SHELL: start
+  JAVA_VER: 1.7.0_181
+  # プレースホルダは(変数名)の形式
+  JAVA_HOME: C:\java\jdk-(JAVA_VER)
+  # PATHの組み立て
+  PATH: (JAVA_HOME)\bin;(PATH)
+```
+
 ### 別のYamlの読み込み
 
 * includeセクションに配列形式で、読み込みたいプロファイル名を指定します。
 * 拡張子(.yml)は不要です
+
 
 ```
 # base.yml
@@ -83,9 +106,17 @@ env:
     - (PATH)
 ```
 
+* includeセクションには複数のファイル読み込み記述をすることができます。
+* includeセクションに記述した順に環境の変数の適用をするので、順序には気をつける必要があります。
+
 ## shellコマンドの設定について
 
-* shellコマンドは、ターミナルを起動しますが、各OSのデフォルト設定は特に定義していないので、プロファイル(Yamlファイル)に、起動するシェルの情報を環境変数として定義する必要があります。
+* initコマンドを実行すると、$HOME/.workspacesディレクトリを作成し、base.ymlというプロフィルを生成します。
+  * Windowsの場合は、%USERPROFILE%/.workspaces
+* 各OSに紐付いたターミナル起動コマンドのデフォルトが設定されています。
+* includeセクションにおいてbaseを指定することにより、shellの起動設定をスキップすることができます。
+* shellコマンドで起動したターミナルを変更したい場合は、以下をご参照ください。
+* プロファイル(Yamlファイル)に、起動するシェルの情報を環境変数として定義する必要があります。
 
 ### Windowsの場合
 
@@ -103,7 +134,7 @@ env:
 
 | 変数名 | 値 | 備考 |
 | ----- | ----- | -- |
-| WORKSPACE_SHELL | start |  |
+| WORKSPACE_SHELL | open |  |
 | WORKSPACE_SHELL_ARGS | -a Terminal | 既存のウィンドウがあればその中で起動 |
 | WORKSPACE_SHELL_ARGS | -na Terminal | 常に新しいウィンドウで起動 |
 

@@ -19,8 +19,12 @@ when defined(macosx):
 proc main*(args:Table[string,Value]) : int =
   result = 0
 
-  #echo "args=>",args
+  # echo "args=>",args
   var env = getCurrentEnv()
+
+  if args["init"] :
+    result = createWorkspacesForlder()
+    return
 
   if args["shell"] or args["exec"]:
     let path = $args["<profile>"] 

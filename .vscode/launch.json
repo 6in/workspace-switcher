@@ -29,7 +29,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/test",
-            "args": ["shell","mac-env"],
+            "args": ["init"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
