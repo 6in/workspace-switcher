@@ -8,6 +8,23 @@
   * XXXEnv系(pyenv/rbenv等)との相性はあまりよくありません。
   * XXXEnvでインストールされた任意のバージョンへの物理パスを把握しておく必要があります。
 
+## ソースからビルド
+
+* nim >= 0.19
+
+```
+# 0.19.0用のYaml
+git clone -b "for-0.19.0" https://github.com/6in/NimYAML.git
+cd NimYAML
+nimble install
+
+# wsのインストール
+cd
+git clone https://github.com/6in/workspace-switcher.git
+cd workspace-switcher
+nimble install
+```
+
 ## コマンドラインオプション
 
 ```

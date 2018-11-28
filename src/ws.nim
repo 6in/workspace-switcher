@@ -24,5 +24,5 @@ Options:
 
 # 引数チェック
 when isMainModule:
-  let args = docopt(doc, version = "ws 0.1.0")
+  let args = docopt(doc, version = "ws 0.1.1")
   quit(main(args))
