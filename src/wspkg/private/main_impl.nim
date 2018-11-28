@@ -117,7 +117,7 @@ proc createWorkspacesForlder* () : int =
   var yaml = ""
   var note = """# insert this text into your shell's profile at end.
 # from here
-if [ "$WORKSPACE_NAME != "" ]; then
+if [ "$WORKSPACE_NAME" != "" ]; then
   PROMPT="(${WORKSPACE_NAME})${PROMPT}"
   export PATH=${WORKSPACE_PATH}
 fi
