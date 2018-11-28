@@ -49,7 +49,7 @@ proc getProfilePath(path:string) : string =
     result = root / path
     return
 
-  when defined(window):
+  when defined(windows):
     root = getEnv("USERPROFILE",os.getCurrentDir()) / ".workspaces"
   else:
     root = getEnv("HOME",os.getCurrentDir()) / ".workspaces"
@@ -124,7 +124,7 @@ fi
 """
   var userHome = "HOME"
 
-  when defined(window):
+  when defined(windows):
     userHome = "USERPROFILE"
     root = getEnv(userHome,"undefined")
     yaml = "env:\r\n  WORKSPACE_SHELL: start"
