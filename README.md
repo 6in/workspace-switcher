@@ -52,19 +52,24 @@ Options:
 
 ### Yaml形式
 
+<<<<<<< HEAD
 * envセクション配下にハッシュ(キー：値)形式で環境変数名と値を記述します。
 * PATH等のパス区切りを設定する変数については、Yamlの配列表現にて記述することもできます。
+=======
+* envセクション配下にハッシュ形式で変数名と値を記述します。
+* PATH等のパス区切りを設定する変数については、Yamlの配列表現にて記述することもできます。
+>>>>>>> b00844afe51930f12020abf9dc5a5942f6406bd6
 
 ```
 env:
   WORKSPACE_SHELL: start
   JAVA_VER: 1.7.0_181
-  # プレースホルダは(変数名)の形式
+  # プレースホルダは(変数名)の形式
   JAVA_HOME: C:\java\jdk-(JAVA_VER)
   # PATHの組み立て
   PATH:
     - (JAVA_HOME)\bin
-    - (PATH)
+    - (PATH)
 ```
 
 * PATHの表記は以下でも同等の記述となります。
@@ -81,13 +86,13 @@ env:
 
 ### 別のYamlの読み込み
 
-* includeセクションに配列形式で、読み込みたいプロファイル名を指定します。
-* 拡張子(.yml)は不要です
+* includeセクションに配列形式で、読み込みたいプロファイル名を指定します。
+  * 拡張子(.yml)は不要です
 
 
 ```
 # base.yml
-# 共通設定を記述したプロファイル
+# 共通設定を記述したプロファイル
 env:
   WORKSPACE_SHELL: start
 ```
@@ -111,12 +116,16 @@ env:
 
 ## shellコマンドの設定について
 
+<<<<<<< HEAD
 * initコマンドを実行すると、$HOME/.workspacesディレクトリを作成し、base.ymlというプロフィルを生成します。
   * Windowsの場合は、%USERPROFILE%/.workspaces
 * 各OSに紐付いたターミナル起動コマンドのデフォルトが設定されています。
 * includeセクションにおいてbaseを指定することにより、shellの起動設定をスキップすることができます。
 * shellコマンドで起動したターミナルを変更したい場合は、以下をご参照ください。
 * プロファイル(Yamlファイル)に、起動するシェルの情報を環境変数として定義する必要があります。
+=======
+* shellコマンドは、ターミナルを起動しますが、各OSのデフォルト設定は特に定義していないので、プロファイル(Yamlファイル)に、起動するシェルの情報を環境変数として定義する必要があります。
+>>>>>>> b00844afe51930f12020abf9dc5a5942f6406bd6
 
 ### Windowsの場合
 
@@ -132,20 +141,27 @@ env:
 
 * shellコマンドで、ターミナルを開く場合には、Terminal.appを指定するのではなく、openを指定し、引数に```-a Terminal```を指定します。
 
-| 変数名 | 値 | 備考 |
+| 変数名 | 値 | 備考 |
 | ----- | ----- | -- |
+<<<<<<< HEAD
 | WORKSPACE_SHELL | open |  |
 | WORKSPACE_SHELL_ARGS | -a Terminal | 既存のウィンドウがあればその中で起動 |
 | WORKSPACE_SHELL_ARGS | -na Terminal | 常に新しいウィンドウで起動 |
+=======
+| WORKSPACE_SHELL | start |  |
+| WORKSPACE_SHELL_ARGS | -a Terminal | 既存のウィンドウがあればその中で起動 |
+| WORKSPACE_SHELL_ARGS | -na Terminal | 常に新しいウィンドウで起動 |
+>>>>>>> b00844afe51930f12020abf9dc5a5942f6406bd6
 
-* iTermを起動したい場合は、TerminalをiTermに変更するだけです
+* iTermを起動したい場合は、TerminalをiTermに変更するだけです
 
 ### Linuxの場合
 
 * shellコマンドで、ターミナルを開く場合には、gnome-terminalへのパスを、設定してください。
-| 変数名 | 値 | 備考 |
+
+| 変数名 | 値 | 備考 |
 | ----- | ----- | -- |
-| WORKSPACE_SHELL | /usr/bin/gnome-terminal | 各ディストリビューションに依存します |
+| WORKSPACE_SHELL | /usr/bin/gnome-terminal | 各ディストリビューションに依存します |
 
 
 ## 設定ファイルの置き場所
@@ -209,7 +225,7 @@ java version "1.7.0_141"
 
 * Mac/Linuxでターミナルを起動するとデフォルトに設定されているシェル(bash/zsh)が起動され、.bashrc/.zshrc等のプロファイルを読み込みます。
 * workspaceツールは、起動するプロセスに環境変数を付与する形式なので、シェルが自動で読み込むプロファイル無いにてPATHを再設定すると、Yamlで設定した環境変数(特にPATH)が正しく設定されない状態になってしまいます。
-* この状態を回避するために以下のコードを、プロファイルの一番最後に追記してください。
+* この状態を回避するために以下のコードを、プロファイルの一番最後に追記してください。
 
 ```
 if [ "$WORKSPACE_NAME" != "" ]; then
@@ -218,6 +234,6 @@ if [ "$WORKSPACE_NAME" != "" ]; then
 fi
 ```
 
-* workspaceを経由して起動したターミナルの環境のWORKSPACE_NAMEという変数に、指定したワークスペース名が格納されます。
+* workspaceを経由して起動したターミナルの環境のWORKSPACE_NAMEという変数に、指定したワークスペース名が格納されます。
 * この変数が空でないときに、環境変数PATHをWORKSPACE_PATHという環境変数の値に置き換える処理を記述します。
-* WORKSPACE_PATHは、workspaceが起動した環境変数PATHと同じ値を保持しています。
+* WORKSPACE_PATHは、workspaceが起動した環境変数PATHと同じ値を保持しています。
