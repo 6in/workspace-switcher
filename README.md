@@ -52,13 +52,8 @@ Options:
 
 ### Yaml形式
 
-<<<<<<< HEAD
 * envセクション配下にハッシュ(キー：値)形式で環境変数名と値を記述します。
 * PATH等のパス区切りを設定する変数については、Yamlの配列表現にて記述することもできます。
-=======
-* envセクション配下にハッシュ形式で変数名と値を記述します。
-* PATH等のパス区切りを設定する変数については、Yamlの配列表現にて記述することもできます。
->>>>>>> b00844afe51930f12020abf9dc5a5942f6406bd6
 
 ```
 env:
@@ -116,16 +111,12 @@ env:
 
 ## shellコマンドの設定について
 
-<<<<<<< HEAD
 * initコマンドを実行すると、$HOME/.workspacesディレクトリを作成し、base.ymlというプロフィルを生成します。
   * Windowsの場合は、%USERPROFILE%/.workspaces
 * 各OSに紐付いたターミナル起動コマンドのデフォルトが設定されています。
 * includeセクションにおいてbaseを指定することにより、shellの起動設定をスキップすることができます。
 * shellコマンドで起動したターミナルを変更したい場合は、以下をご参照ください。
 * プロファイル(Yamlファイル)に、起動するシェルの情報を環境変数として定義する必要があります。
-=======
-* shellコマンドは、ターミナルを起動しますが、各OSのデフォルト設定は特に定義していないので、プロファイル(Yamlファイル)に、起動するシェルの情報を環境変数として定義する必要があります。
->>>>>>> b00844afe51930f12020abf9dc5a5942f6406bd6
 
 ### Windowsの場合
 
@@ -143,15 +134,9 @@ env:
 
 | 変数名 | 値 | 備考 |
 | ----- | ----- | -- |
-<<<<<<< HEAD
 | WORKSPACE_SHELL | open |  |
-| WORKSPACE_SHELL_ARGS | -a Terminal | 既存のウィンドウがあればその中で起動 |
+| WORKSPACE_SHELL_ARGS | -a Terminal | 既存のウィンドウがあればその中で新しいタブで起動 |
 | WORKSPACE_SHELL_ARGS | -na Terminal | 常に新しいウィンドウで起動 |
-=======
-| WORKSPACE_SHELL | start |  |
-| WORKSPACE_SHELL_ARGS | -a Terminal | 既存のウィンドウがあればその中で起動 |
-| WORKSPACE_SHELL_ARGS | -na Terminal | 常に新しいウィンドウで起動 |
->>>>>>> b00844afe51930f12020abf9dc5a5942f6406bd6
 
 * iTermを起動したい場合は、TerminalをiTermに変更するだけです
 
