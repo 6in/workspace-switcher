@@ -145,7 +145,7 @@ fi
   root = root / ".workspaces"
   if root.existsDir() == false :
     root.createDir()
-    echo root & "was created."
+    echo root & " was created."
 
   # base.ymlを出力
   if (root / "base.yml").existsFile == false:
