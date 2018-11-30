@@ -26,6 +26,9 @@ proc main*(args:Table[string,Value]) : int =
     result = createWorkspacesForlder()
     return
 
+  if args["list"] :
+    result = showProfiles()
+
   if args["shell"] or args["exec"]:
     let path = $args["<profile>"] 
     env["WORKSPACE_NAME"] = path

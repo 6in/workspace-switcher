@@ -156,3 +156,25 @@ fi
       echo root / "base.yml was not created."
   
   echo note
+
+proc showProfiles*() : int =
+  var userHome = "HOME"
+
+  when defined(windows):
+    userHome = "USERPROFILE"
+
+  let workspaces = getEnv(userHome,"undefined") / ".workspaces"
+  if workspaces.existsDir == false:
+    echo "folder not found. ->" & workspaces 
+    result = 1
+    return
+
+  for t,f in walkDir(workspaces):
+    if t != pcFile :
+      continue
+      
+    let d = f.splitFile
+    if d.ext == ".yml":
+      echo d.name
+
+

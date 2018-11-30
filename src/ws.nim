@@ -6,16 +6,18 @@ ws.
 
 Usage:
   ws init
+  ws list
   ws shell <profile>
   ws exec  <profile> <command> [<args>]
-  ws show
+  ws show [<envname>]
   ws (-h | --help)
   ws --version
 
 Options:
-  init          create .workspaces folder
-  shell         open terminal with profile
-  exec          execute application with profile
+  init          create .workspaces folder.
+  list          show profiles in .workspaces forlder.
+  shell         open terminal with profile.
+  exec          execute application with profile.
   <profile>     profile name(without .yml)    
   <args>        execute application's arguments.
   -h --help     Show this screen.
