@@ -42,7 +42,7 @@ proc embedParam(env: StringTableRef, val: string ) : string =
       return m.captures[0]
   )
 
-proc getProfilePath(path:string) : string =
+proc getProfilePath* (path:string, checkExists: bool = true) : string =
   var root = os.getCurrentDir()
 
   if (root / path).existsFile :
@@ -55,7 +55,8 @@ proc getProfilePath(path:string) : string =
     root = getEnv("HOME",os.getCurrentDir()) / ".workspaces"
 
   result = root / path
-  if result.existsFile == false:
+
+  if checkExists and result.existsFile == false:
     var e: ref OSError
     new(e)
     e.msg = "file not found =>" & result
@@ -127,14 +128,14 @@ fi
   when defined(windows):
     userHome = "USERPROFILE"
     root = getEnv(userHome,"undefined")
-    yaml = "env:\r\n  WORKSPACE_SHELL: start"
+    yaml = "env:\r\n  WORKSPACE_SHELL: start\r\n  WORKSPACE_EDITOR: C:\\windows\\notepad.exe\r\n  PROMPT: $P$_$C(WORKSPACE_NAME)$F$$$S"
     note = ""
   when defined(macosx):
     root = getEnv(userHome,"undefined") 
-    yaml = "env:\n  WORKSPACE_SHELL: open\n  WORKSPACE_SHELL_ARGS: -na Terminal"
+    yaml = "env:\p  WORKSPACE_SHELL: open\p  WORKSPACE_SHELL_ARGS: -na Terminal\p  WORKSPACE_EDITOR: vim"
   when defined(linux):
     root = getEnv(userHome,"undefined")
-    yaml = "env:\n  WORKSPACE_SHELL: /usr/bin/gnome-terminal"
+    yaml = "env:\p  WORKSPACE_SHELL: /usr/bin/gnome-terminal\p  WORKSPACE_EDITOR: vim"
 
   if root == "undefined" :
     result = 1

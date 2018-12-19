@@ -7,6 +7,7 @@ import osproc
 import strtabs
 import strutils
 import nre
+import strformat
 
 when defined(windows):
   proc c_setenv(envstr: cstring): cint {.
@@ -15,6 +16,20 @@ when defined(windows):
 when defined(macosx):
   proc c_setenv(envstr: cstring): cint {.
     importc: "putenv", header: "<stdlib.h>".}    
+
+proc editProfile(path: string, env: StringTableRef ) : int = 
+    # プロファイルを読み出し
+    let newEnv = readProfile( path & ".yml", env)
+    let editor = env["WORKSPACE_EDITOR"]
+
+    let process : Process = startProcess(
+        editor, 
+        "", 
+        @[getProfilePath(path & ".yml")], 
+        newEnv, 
+        {poStdErrToStdOut, poInteractive}
+    )
+    process.close
 
 proc main*(args:Table[string,Value]) : int =
   result = 0
@@ -61,7 +76,8 @@ proc main*(args:Table[string,Value]) : int =
     
     when defined(windows):
       if exec_path.toLower.startsWith("start") :
-        for item in env.pairs:          
+        for item in env.pairs:
+          # echo fmt"{item.key}={item.value}"
           discard c_setenv(item.key & "=" & item.value)
         result = os.execShellCmd(exec_path & " " & arguments.join(" "))
         return
@@ -87,10 +103,24 @@ proc main*(args:Table[string,Value]) : int =
     process.close
 
   if args["show"] :
+    var envNames: seq[string] = @[] 
+    let v: Value = args["<envnames>"]
+    for item in v.items:
+      # echo $item
+      envNames.add $item
+
+    let allShow = envNames.len == 0
+
+    echo "include:"
+    echo "  - base"
     echo "env:"
     for item in os.envPairs():
       let key = item.key
       let val = item.value
+
+      if allShow == false and envNames.find(key) == -1 :
+        continue
+
       if val.find($PathSep) >= 0:
         echo "  " & key & ":"
         for p in val.split($PathSep):
@@ -100,3 +130,31 @@ proc main*(args:Table[string,Value]) : int =
         if key != "":
           echo "  " & key & ": " & val
 
+  if args["edit"] :
+    let profile = $args["<profile>"] 
+    result = editProfile( profile, env )
+
+  if args["new"]: 
+    let path = $args["<profile>"] 
+    let newPath = getProfilePath(path & ".yml", false)
+
+    if newPath.existsFile == false :
+      let f = open(newPath, FileMode.fmWrite)
+      when defined(windows):
+        let pathName = "Path"
+        let crlf = "\r\n"
+      else: 
+        let pathName = "PATH"
+        let crlf = "\n"
+
+      f.write fmt"""include:{crlf}  - base{crlf}env:{crlf}  {pathName}:{crlf}"""
+
+      for p in env[pathName].split($PathSep):
+        if p != "" :
+          f.write fmt"    - {p}{crlf}" 
+      f.close
+
+    if newPath.existsFile :
+      echo fmt"{newPath} was created."
+      # プロファイルの編集
+      result = editProfile(path,env)
