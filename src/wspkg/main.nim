@@ -8,6 +8,8 @@ import strtabs
 import strutils
 import nre
 import strformat
+import sequtils
+import algorithm
 
 when defined(windows):
   proc c_setenv(envstr: cstring): cint {.
@@ -47,16 +49,12 @@ proc main*(args:Table[string,Value]) : int =
   if args["shell"] or args["exec"]:
     let path = $args["<profile>"] 
     env["WORKSPACE_NAME"] = path
-    env["DEFAULT_PATH"] = os.getEnv("Path","") & PathSep & os.getEnv("PATH","")
+    env["DEFAULT_PATH"] = os.getEnv(pathName,"")
 
     # プロファイルを読み出し
     env = readProfile( path & ".yml",env)
     env = env.remove(@["DEFAULT_PATH"])
-    var ws_path = ""
-    if env.hasKey("Path"): 
-      ws_path = env["Path"]
-    elif env.hasKey("PATH"):
-      ws_path = env["PATH"]
+    var ws_path = env[pathName]
 
     env["WORKSPACE_PATH"] = ws_path
 
@@ -140,12 +138,6 @@ proc main*(args:Table[string,Value]) : int =
 
     if newPath.existsFile == false :
       let f = open(newPath, FileMode.fmWrite)
-      when defined(windows):
-        let pathName = "Path"
-        let crlf = "\r\n"
-      else: 
-        let pathName = "PATH"
-        let crlf = "\n"
 
       f.write fmt"""include:{crlf}  - base{crlf}env:{crlf}  {pathName}:{crlf}"""
 
@@ -158,3 +150,26 @@ proc main*(args:Table[string,Value]) : int =
       echo fmt"{newPath} was created."
       # プロファイルの編集
       result = editProfile(path,env)
+
+  if args["test"] :
+    let path = $args["<profile>"] 
+    env["WORKSPACE_NAME"] = path
+    
+    # プロファイルを読み出し
+    env = readProfile( path & ".yml",env)
+
+    # 環境変数のキー一覧を取得し、ソートする
+    var keys : seq[string] = @[]
+    for item in env.pairs:
+      if item.key == "" : 
+        continue
+      keys.add item.key
+    keys.sort( proc (x,y:string) : int = cmp(x,y) )
+
+    # OS毎に環境変数設定を出力
+    for key in keys:
+      let val = env[key]
+      when defined(windows) :
+        echo fmt"SET {key}={val}"
+      else:
+        echo fmt"export {key}={val}"

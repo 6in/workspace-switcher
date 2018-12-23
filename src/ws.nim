@@ -1,5 +1,6 @@
 import docopt
 import wspkg/main
+import version
 
 let doc = """
 ws.
@@ -14,7 +15,7 @@ Usage:
   ws show  [<envnames>...]
   ws test  <profile>
   ws (-h | --help)
-  ws --version
+  ws (-v | --version)
 
 Options:
   init          create .workspaces folder.
@@ -29,10 +30,10 @@ Options:
   <args>        execute application's arguments.
   <envnames...> show multiple variables
   -h --help     Show this screen.
-  --version     Show version. 
+  -v --version  Show version. 
 """
 
 # 引数チェック
-when isMainModule:
-  let args = docopt(doc, version = "ws 0.1.1")
+when isMainModule:  
+  let args = docopt(doc, version = "ws " & current_version)
   quit(main(args))

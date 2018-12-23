@@ -7,6 +7,13 @@ import json,strutils,os,streams
 import ospaths
 import nre
 
+when defined(windows):
+  const pathName* = "Path"
+  const crlf* = "\r\n"
+else: 
+  const pathName* = "PATH"
+  const crlf* = "\n"
+
 proc dump(yamlDoc:YamlDocument ,file:string, style:PresentationStyle) =
   ## Yamlをダンプ
   var s = newFileStream(file, fmWrite)
@@ -132,10 +139,10 @@ fi
     note = ""
   when defined(macosx):
     root = getEnv(userHome,"undefined") 
-    yaml = "env:\p  WORKSPACE_SHELL: open\p  WORKSPACE_SHELL_ARGS: -na Terminal\p  WORKSPACE_EDITOR: vim"
+    yaml = "env:\p  WORKSPACE_SHELL: open\p  WORKSPACE_SHELL_ARGS: -na Terminal\p  WORKSPACE_EDITOR: open -na Code"
   when defined(linux):
     root = getEnv(userHome,"undefined")
-    yaml = "env:\p  WORKSPACE_SHELL: /usr/bin/gnome-terminal\p  WORKSPACE_EDITOR: vim"
+    yaml = "env:\p  WORKSPACE_SHELL: /usr/bin/gnome-terminal\p  WORKSPACE_EDITOR: /usr/bin/gedit"
 
   if root == "undefined" :
     result = 1

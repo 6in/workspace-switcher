@@ -28,34 +28,44 @@ nimble install
 ## コマンドラインオプション
 
 ```
-ws.
-
 Usage:
   ws init
-  ws shell <profile>
+  ws list
+  ws shell <profile> [<args>]
   ws exec  <profile> <command> [<args>]
-  ws show
+  ws edit  <profile>
+  ws new   <profile> 
+  ws show  [<envnames>...]
+  ws test  <profile>
   ws (-h | --help)
-  ws --version
+  ws (-v | --version)
 
 Options:
-  init          create ${HONE}.workspaces folder.
+  init          create .workspaces folder.
+  list          show profiles in .workspaces forlder.
   shell         open terminal with profile.
   exec          execute application with profile.
-  show          show current envoironments Yaml format.
+  edit          edit a profile with editor.
+  new           create a new prilfe on (HOME)/.workspaces.
+  show          show current environments.
+  test          symulate profile's environments.
   <profile>     profile name(without .yml)    
   <args>        execute application's arguments.
+  <envnames...> show multiple variables
   -h --help     Show this screen.
-  --version     Show version. 
-
+  -v --version  Show version. 
 ```
 
 | コマンド名 | 説明 |
 | -------- | ---- |
 | init   | 初期化コマンドです。ホームディレクトリ配下に.workspacesフォルダを生成します |
+| list  | .workspaces配下のプロファイル一覧を表示します  |
 | shell | プロファイル名を指定して、ターミナルをオープンします |
 | exec | プロファイル名を指定して、アプリケーションを実行します |
+| edit  | プロファイルをエディタを開きます  |
+| new  |  プロファイルを新規作成します |
 | show | 現在の環境変数をYaml形式で出力します |
+| test | プロファイルを適用した結果を、各OSにバッチ/シェルを生成します |
 
 * プロファイル名は、Yamlファイルの拡張子(.yml)を取り除いたファイル名を指定します。
 
