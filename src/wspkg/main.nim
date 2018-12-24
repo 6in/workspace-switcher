@@ -23,15 +23,20 @@ proc editProfile(path: string, env: StringTableRef ) : int =
     # プロファイルを読み出し
     let newEnv = readProfile( path & ".yml", env)
     let editor = env["WORKSPACE_EDITOR"]
+    let profilePath = getProfilePath(path & ".yml")
 
-    let process : Process = startProcess(
-        editor, 
-        "", 
-        @[getProfilePath(path & ".yml")], 
-        newEnv, 
-        {poStdErrToStdOut, poInteractive}
-    )
-    process.close
+    when defined(macosx) :
+      discard execShellCmd(fmt"{editor} {profilePath}")
+
+    else:
+      let process : Process = startProcess(
+          editor, 
+          "", 
+          @[profilePath], 
+          newEnv, 
+          {poStdErrToStdOut, poInteractive}
+      )
+      process.close
 
 proc main*(args:Table[string,Value]) : int =
   result = 0
