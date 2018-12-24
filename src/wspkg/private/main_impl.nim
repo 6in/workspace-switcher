@@ -139,7 +139,7 @@ fi
     note = ""
   when defined(macosx):
     root = getEnv(userHome,"undefined") 
-    yaml = "env:\p  WORKSPACE_SHELL: open\p  WORKSPACE_SHELL_ARGS: -na Terminal\p  WORKSPACE_EDITOR: open -na Code"
+    yaml = "env:\p  WORKSPACE_SHELL: open\p  WORKSPACE_SHELL_ARGS: -na Terminal\p  WORKSPACE_EDITOR: open -na /Applications/TextEdit.app"
   when defined(linux):
     root = getEnv(userHome,"undefined")
     yaml = "env:\p  WORKSPACE_SHELL: /usr/bin/gnome-terminal\p  WORKSPACE_EDITOR: /usr/bin/gedit"

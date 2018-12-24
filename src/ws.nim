@@ -1,6 +1,9 @@
 import docopt
 import wspkg/main
-import version
+# import version
+
+include nimble_config
+include ../ws.nimble
 
 let doc = """
 ws.
@@ -35,5 +38,5 @@ Options:
 
 # 引数チェック
 when isMainModule:  
-  let args = docopt(doc, version = "ws " & current_version)
+  let args = docopt(doc, version = "ws " & version)
   quit(main(args))
