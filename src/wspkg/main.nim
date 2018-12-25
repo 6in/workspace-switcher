@@ -90,7 +90,8 @@ proc main*(args:Table[string,Value]) : int =
         for item in env.pairs:
           # echo $item
           discard c_setenv(item.key & "=" & item.value)
-        result = os.execShellCmd(exec_path & " " & arguments.join(" ") & " " & os.getCurrentDir())
+          #result = os.execShellCmd(exec_path & " " & arguments.join(" ") & " " & os.getCurrentDir())
+        result = os.execShellCmd(exec_path & " " & arguments.join(" ") )
         return
 
     echo exec_path & " " & $arguments.join(" ")
@@ -175,6 +176,6 @@ proc main*(args:Table[string,Value]) : int =
     for key in keys:
       let val = env[key]
       when defined(windows) :
-        echo fmt"SET {key}={val}"
+        echo fmt"SET {key}=""{val}"""
       else:
-        echo fmt"export {key}={val}"
+        echo fmt"export {key}=""{val}"""

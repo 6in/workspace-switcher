@@ -1,4 +1,4 @@
-# ws アプリケーション
+# workspace-switcher アプリケーション
 
 ## 概要
 
@@ -111,7 +111,6 @@ env:
 * includeセクションに配列形式で、読み込みたいプロファイル名を指定します。
   * 拡張子(.yml)は不要です
 
-
 ```
 # base.yml
 # 共通設定を記述したプロファイル
@@ -157,7 +156,7 @@ env:
 
 ### Macの場合
 
-* shellコマンドで、ターミナルを開く場合には、Terminal.appを指定するのではなく、openを指定し、引数に```-a Terminal```を指定します。
+shellコマンドで、ターミナルを開く場合には、Terminal.appを指定するのではなく、openを指定し、引数に```-a Terminal```を指定します。
 
 | 変数名 | 値 | 備考 |
 | ----- | ----- | -- |
@@ -165,7 +164,20 @@ env:
 | WORKSPACE_SHELL_ARGS | -a Terminal | 既存のウィンドウがあればその中で新しいタブで起動 |
 | WORKSPACE_SHELL_ARGS | -na Terminal | 常に新しいウィンドウで起動 |
 
-* iTermを起動したい場合は、TerminalをiTermに変更するだけです
+iTermを起動したい場合は、TerminalをiTermに変更するだけです
+
+#### Terminal/iTermでの動作不具合
+
+Macでの動作確認をしていたところ、Terminal/iTermともに、あとから起動したターミナルの設定を、起動済みのターミナルに影響を与える症状があることがわかりました。
+ターミナルをあとから起動すると、既存のターミナルがそれまでのセッションを終了し、あとから起動したターミナルのセッションをと同様なセッションを復元するという現象のようです。
+この現象の回避策が今の所見つからないので、Terminal/iTerm以外の端末アプリを試したところ、Alacrittyでの動作が、Windiws/Linuxでの動作に最も近いものでした。
+
+現在の私のMacOSでの設定は以下のようになっています
+
+```yaml:base.yml
+env:
+  WORKSPACE_SHELL: /Applications/Alacritty.app/Contents/MacOS/alacritty
+```
 
 ### Linuxの場合
 
@@ -174,7 +186,6 @@ env:
 | 変数名 | 値 | 備考 |
 | ----- | ----- | -- |
 | WORKSPACE_SHELL | /usr/bin/gnome-terminal | 各ディストリビューションに依存します |
-
 
 ## 設定ファイルの置き場所
 
@@ -190,7 +201,6 @@ env:
 
 * カレントディレクトリ
 * ${HOME}/.workspacesに入っているYamlファイル
-
 
 ### 設定ファイルサンプル
 
@@ -225,7 +235,7 @@ public Class Hello {
 ```
 
 ```
-ws shell jdk17.yml
+ws shell jdk17
 
 (jdk17)$ java -version
 java version "1.7.0_141"
@@ -249,3 +259,20 @@ fi
 * workspaceを経由して起動したターミナルの環境のWORKSPACE_NAMEという変数に、指定したワークスペース名が格納されます。
 * この変数が空でないときに、環境変数PATHをWORKSPACE_PATHという環境変数の値に置き換える処理を記述します。
 * WORKSPACE_PATHは、workspaceが起動した環境変数PATHと同じ値を保持しています。
+
+## Macでexec コマンドでアプリケーションを起動する
+
+MacでGUIアプリケーションを開くときにはopenコマンドを利用しますが、wsでは複数のパラメータに対応していないため、以下のようなシェルを用意しexecコマンドの引数に渡してください。
+
+VSCodeを起動するシェル
+
+```shell:~/bin/vscode
+#!/bin/sh
+VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args $*
+```
+
+VSCodeをシェル経由で起動
+
+```
+ws exec profile ~/bin/vscode .
+```
