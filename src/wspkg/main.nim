@@ -53,7 +53,7 @@ proc addKeyVal(env: var StringTableRef, keyvalues: seq[string]): StringTableRef 
 proc main*(args:Table[string,Value]) : int =
   result = 0
 
-  echo "args=>",args
+  # echo "args=>",args
   var env = getCurrentEnv()
 
   if args["init"] :
@@ -67,6 +67,7 @@ proc main*(args:Table[string,Value]) : int =
     let path = $args["<profile>"] 
     env["WORKSPACE_NAME"] = path
     env["DEFAULT_PATH"] = os.getEnv(pathName,"")
+    env["WORKSPACE_PWD"] = getCurrentDir()
 
     var kvArgs : seq[string] = @[]
     if args["<kvargs>"].kind == vkList :

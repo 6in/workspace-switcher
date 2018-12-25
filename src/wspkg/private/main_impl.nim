@@ -128,6 +128,7 @@ proc createWorkspacesForlder* () : int =
 if [ "$WORKSPACE_NAME" != "" ]; then
   PROMPT="(${WORKSPACE_NAME})${PROMPT}"
   export PATH=${WORKSPACE_PATH}
+  cd $WORKSPACE_PWD
 fi
 """
   var userHome = "HOME"
