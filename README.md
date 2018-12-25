@@ -262,7 +262,7 @@ fi
 
 ## Macでexec コマンドでアプリケーションを起動する
 
-MacでGUIアプリケーションを開くときにはopenコマンドを利用しますが、wsでは複数のパラメータに対応していないため、以下のようなシェルを用意しexecコマンドの引数に渡してください。
+MacでGUIアプリケーションを開くときにはopenコマンドを利用しますがopenにわたすパラメータが長くなるため、以下のようなシェルを用意しexecコマンドの引数に渡してください。
 
 VSCodeを起動するシェル
 
@@ -274,5 +274,11 @@ VSCODE_CWD="$PWD" open -n -b "com.microsoft.VSCode" --args $*
 VSCodeをシェル経由で起動
 
 ```
-ws exec profile ~/bin/vscode .
+ws exec jdk8 ~/bin/vscode .
+```
+
+以下のように記述してもVSCodeを起動することもできます。
+
+```
+ws exec jdk8 open " -n -b com.microsoft.VSCode --args $PWD/bin"
 ```

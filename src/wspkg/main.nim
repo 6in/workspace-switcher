@@ -38,10 +38,22 @@ proc editProfile(path: string, env: StringTableRef ) : int =
       )
       process.close
 
+proc addKeyVal(env: var StringTableRef, keyvalues: seq[string]): StringTableRef =
+  result = env
+  let regKV = re"""(\w+)\s*=\s*(\w+)"""
+  for kv in keyvalues:
+    # echo $kv
+    let optM = kv.match(regKV)
+    if optM.isSome:
+      let m = optM.get
+      let k = m.captures[0]
+      let v = m.captures[1]
+      env[k] = v 
+
 proc main*(args:Table[string,Value]) : int =
   result = 0
 
-  # echo "args=>",args
+  echo "args=>",args
   var env = getCurrentEnv()
 
   if args["init"] :
@@ -55,6 +67,16 @@ proc main*(args:Table[string,Value]) : int =
     let path = $args["<profile>"] 
     env["WORKSPACE_NAME"] = path
     env["DEFAULT_PATH"] = os.getEnv(pathName,"")
+
+    var kvArgs : seq[string] = @[]
+    if args["<kvargs>"].kind == vkList :
+      if args["<kvargs>"].len > 0 :
+        # let value = args["<kvargs>"]
+        # kvArgs = @value
+        kvArgs = @(args["<kvargs>"])
+      elif args["<kvargs>"].kind == vkStr:
+        kvArgs.add $args["<kvargs>"]
+    discard env.addKeyVal kvArgs
 
     # プロファイルを読み出し
     env = readProfile( path & ".yml",env)

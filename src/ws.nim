@@ -11,7 +11,7 @@ ws.
 Usage:
   ws init
   ws list
-  ws shell <profile> [<args>]
+  ws shell <profile> [<kvargs>...]
   ws exec  <profile> <command> [<args>]
   ws edit  <profile>
   ws new   <profile> 
@@ -30,6 +30,7 @@ Options:
   show          show current environments.
   test          symulate profile's environments.
   <profile>     profile name(without .yml)    
+  <kvargs>...   key,value Parameters.
   <args>        execute application's arguments.
   <envnames...> show multiple variables
   -h --help     Show this screen.
