@@ -6,30 +6,32 @@ include nimble_config
 include ../ws.nimble
 
 let doc = """
-ws.
+workspace switcher.
 
 Usage:
   ws init
   ws list
-  ws shell <profile> [<kvargs>...]
-  ws exec  <profile> <command> [<args>]
-  ws edit  <profile>
   ws new   <profile> 
+  ws edit  <profile>
   ws show  [<envnames>...]
-  ws test  <profile>
+  ws shell [--no-inherit] <profile> [<kvargs>...]
+  ws exec  [--no-inherit] <profile> <commands>...
+  ws test  [--no-inherit] <profile> [<kvargs>...]
   ws (-h | --help)
   ws (-v | --version)
 
 Options:
   init          create .workspaces folder.
   list          show profiles in .workspaces forlder.
-  shell         open terminal with profile.
-  exec          execute application with profile.
-  edit          edit a profile with editor.
   new           create a new prilfe on (HOME)/.workspaces.
+  edit          edit a profile with editor.
   show          show current environments.
-  test          symulate profile's environments.
-  <profile>     profile name(without .yml)    
+  shell         open terminal with profile.
+  test          export environments profile.
+  exec          execute application with profile.
+  --no-inherit  not inherit from current environments only yaml environments.
+  <profile>     profile name(without .yml)
+  <commands>... exec parameters.    
   <kvargs>...   key,value Parameters.
   <args>        execute application's arguments.
   <envnames...> show multiple variables

@@ -11,13 +11,13 @@ import strformat
 import sequtils
 import algorithm
 
-when defined(windows):
-  proc c_setenv(envstr: cstring): cint {.
-    importc: "putenv", header: "<stdlib.h>".}
+# when defined(windows):
+#   proc c_setenv(envstr: cstring): cint {.
+#     importc: "putenv", header: "<stdlib.h>".}
 
-when defined(macosx):
-  proc c_setenv(envstr: cstring): cint {.
-    importc: "putenv", header: "<stdlib.h>".}    
+# when defined(macosx):
+#   proc c_setenv(envstr: cstring): cint {.
+#     importc: "putenv", header: "<stdlib.h>".}    
 
 proc editProfile(path: string, env: StringTableRef ) : int = 
     # プロファイルを読み出し
@@ -40,7 +40,7 @@ proc editProfile(path: string, env: StringTableRef ) : int =
 
 proc addKeyVal(env: var StringTableRef, keyvalues: seq[string]): StringTableRef =
   result = env
-  let regKV = re"""(\w+)\s*=\s*(\w+)"""
+  let regKV = re"""(\S+)\s*=\s*(\S+)"""
   for kv in keyvalues:
     # echo $kv
     let optM = kv.match(regKV)
@@ -52,9 +52,12 @@ proc addKeyVal(env: var StringTableRef, keyvalues: seq[string]): StringTableRef 
 
 proc main*(args:Table[string,Value]) : int =
   result = 0
-
   # echo "args=>",args
-  var env = getCurrentEnv()
+
+  var env : StringTableRef = newStringTable()
+  if args["--no-inherit"] == false: 
+    echo "no-inherit"
+    env = setCurrentEnv(env)
 
   if args["init"] :
     result = createWorkspacesForlder()
@@ -63,28 +66,29 @@ proc main*(args:Table[string,Value]) : int =
   if args["list"] :
     result = showProfiles()
 
-  if args["shell"] or args["exec"]:
+  if args["shell"] or args["exec"] or args["test"]:
     let path = $args["<profile>"] 
     env["WORKSPACE_NAME"] = path
     env["DEFAULT_PATH"] = os.getEnv(pathName,"")
     env["WORKSPACE_PWD"] = getCurrentDir()
 
     var kvArgs : seq[string] = @[]
-    if args["<kvargs>"].kind == vkList :
-      if args["<kvargs>"].len > 0 :
-        # let value = args["<kvargs>"]
-        # kvArgs = @value
-        kvArgs = @(args["<kvargs>"])
-      elif args["<kvargs>"].kind == vkStr:
-        kvArgs.add $args["<kvargs>"]
+    let valKV: Value = args["<kvargs>"]
+    case valKV.kind
+    of vkList:
+      if valKV.len > 0 :
+        kvArgs = @valKV
+    of vkStr:
+      kvArgs.add $valKV
+    else:
+      discard
     discard env.addKeyVal kvArgs
 
     # プロファイルを読み出し
     env = readProfile( path & ".yml",env)
     env = env.remove(@["DEFAULT_PATH"])
-    var ws_path = env[pathName]
 
-    env["WORKSPACE_PATH"] = ws_path
+    env["WORKSPACE_PATH"] = env[pathName]
 
     var exec_path = ""
     var arguments : seq[string] = @[]
@@ -96,38 +100,48 @@ proc main*(args:Table[string,Value]) : int =
         arguments = ($env["WORKSPACE_SHELL_ARGS"]).split(re"\s+")
 
     if args["exec"] :
-      exec_path = $args["<command>"]
-      if args["<args>"].kind == vkStr :
-        arguments = (" " & $args["<args>"]).split(re"\s+")
-    
-    when defined(windows):
-      if exec_path.toLower.startsWith("start") :
-        for item in env.pairs:
-          # echo fmt"{item.key}={item.value}"
-          discard c_setenv(item.key & "=" & item.value)
-        result = os.execShellCmd(exec_path & " " & arguments.join(" "))
-        return
+      # コマンドライン解析
+      let commandsValue: Value = args["<commands>"]
+      case commandsValue.kind
+      of vkStr:
+        exec_path = strip($commandsValue)
+      of vkList:
+        exec_path = commandsValue[0].strip
+        arguments = @commandsValue[1..^1].map( proc (s:string): string = s.strip )
+      else:
+        discard
 
-    when defined(macosx):
-      if exec_path.toLower.startsWith("open") :
-        for item in env.pairs:
-          # echo $item
-          discard c_setenv(item.key & "=" & item.value)
-          #result = os.execShellCmd(exec_path & " " & arguments.join(" ") & " " & os.getCurrentDir())
-        result = os.execShellCmd(exec_path & " " & arguments.join(" ") )
-        return
+    if args["test"] == false: 
+      when defined(windows):
+        if exec_path.toLower.startsWith("start") :
+          for item in env.pairs:
+            # echo fmt"{item.key}={item.value}"
+            # discard c_setenv(item.key & "=" & item.value)
+            putEnv(item.key,item.value)
+          result = os.execShellCmd(exec_path & " " & arguments.join(" "))
+          return
 
-    echo exec_path & " " & $arguments.join(" ")
+      when defined(macosx):
+        if exec_path.toLower.startsWith("open") :
+          for item in env.pairs:
+            # echo $item
+            # discard c_setenv(item.key & "=" & item.value)
+            putEnv($item.key, $item.value)
+            #result = os.execShellCmd(exec_path & " " & arguments.join(" ") & " " & os.getCurrentDir())
+          result = os.execShellCmd(exec_path & " " & arguments.join(" ") )
+          return
 
-    let process : Process = startProcess(
-        exec_path, 
-        "", 
-        arguments, 
-        env, 
-        {poStdErrToStdOut, poInteractive}
-      )
-    # result = process.waitForExit(-1)
-    process.close
+      echo exec_path & " " & $arguments.join(" ")
+
+      let process : Process = startProcess(
+          exec_path, 
+          "", 
+          arguments, 
+          env, 
+          {poStdErrToStdOut, poInteractive}
+        )
+      # result = process.waitForExit(-1)
+      process.close
 
   if args["show"] :
     var envNames: seq[string] = @[] 
@@ -181,11 +195,11 @@ proc main*(args:Table[string,Value]) : int =
       result = editProfile(path,env)
 
   if args["test"] :
-    let path = $args["<profile>"] 
-    env["WORKSPACE_NAME"] = path
+    # let path = $args["<profile>"] 
+    # env["WORKSPACE_NAME"] = path
     
-    # プロファイルを読み出し
-    env = readProfile( path & ".yml",env)
+    # # プロファイルを読み出し
+    # env = readProfile( path & ".yml",env)
 
     # 環境変数のキー一覧を取得し、ソートする
     var keys : seq[string] = @[]

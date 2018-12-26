@@ -10,9 +10,11 @@ import nre
 when defined(windows):
   const pathName* = "Path"
   const crlf* = "\r\n"
+  const USER_HOME = "USERPROFILE"
 else: 
   const pathName* = "PATH"
   const crlf* = "\n"
+  const USER_HOME = "HOME"
 
 proc dump(yamlDoc:YamlDocument ,file:string, style:PresentationStyle) =
   ## Yamlをダンプ
@@ -49,20 +51,28 @@ proc embedParam(env: StringTableRef, val: string ) : string =
       return m.captures[0]
   )
 
-proc getProfilePath* (path:string, checkExists: bool = true) : string =
-  var root = os.getCurrentDir()
+proc remove* (env: StringTableRef, keys: openArray[string]) : StringTableRef =
+  result = newStringTable()
+  for item in env.pairs :
+    if keys.contains(item.key) == false :
+      result[item.key] = item.value  
 
+proc getWorkspaceFolder() : string = 
+  result = getEnv(USER_HOME,"") / ".workspaces"
+
+proc getProfilePath* (path:string, checkExists: bool = true) : string =
+  var root = getCurrentDir()
+
+  # カレントディレクトリを優先
   if (root / path).existsFile :
     result = root / path
     return
 
-  when defined(windows):
-    root = getEnv("USERPROFILE",os.getCurrentDir()) / ".workspaces"
-  else:
-    root = getEnv("HOME",os.getCurrentDir()) / ".workspaces"
-
+  # .workspacesから取得
+  root = getWorkspaceFolder()
   result = root / path
 
+  # ファイル存在チェックが必須なら、存在チェック
   if checkExists and result.existsFile == false:
     var e: ref OSError
     new(e)
@@ -82,6 +92,7 @@ proc readProfile*(path: string,env: StringTableRef) : StringTableRef =
   if jsonObj.hasKey("include") and jsonObj["include"].kind == JArray:
     for p in jsonObj["include"].items :
       let profile = readProfile( p.getStr & ".yml", result)
+      # プロファイルをマージする
       result = mergeProfile(result,profile)
     
   # 環境構築を行う
@@ -96,20 +107,12 @@ proc readProfile*(path: string,env: StringTableRef) : StringTableRef =
       val2 = data.join($PathSep)
     if val.kind == JString:
       val2 = val.getStr
-    # echo "key=" & key
-    # echo "val=" & val2
     result[key] = result.embedParam(val2)
 
-proc getCurrentEnv*() : StringTableRef =
-  result = newStringTable()
+proc setCurrentEnv*(env: var StringTableRef) : StringTableRef =
+  result = env
   for item in envPairs():
     result[item.key] = $item.value
-
-proc remove* (env: StringTableRef, keys: openArray[string]) : StringTableRef =
-  result = newStringTable()
-  for item in env.pairs :
-    if keys.contains(item.key) == false :
-      result[item.key] = item.value
 
 proc writeText(fileName:string, text: string) : bool =
   result = true
@@ -126,28 +129,26 @@ proc createWorkspacesForlder* () : int =
   var note = """# insert this text into your shell's profile at end.
 # from here
 if [ "$WORKSPACE_NAME" != "" ]; then
-  PROMPT="(${WORKSPACE_NAME})${PROMPT}"
+  PROMPT="${PROMPT}
+(${WORKSPACE_NAME})» "
   export PATH=${WORKSPACE_PATH}
   cd $WORKSPACE_PWD
 fi
 """
-  var userHome = "HOME"
+  root = getEnv(USER_HOME,"undefined")
 
-  when defined(windows):
-    userHome = "USERPROFILE"
-    root = getEnv(userHome,"undefined")
-    yaml = "env:\r\n  WORKSPACE_SHELL: start\r\n  WORKSPACE_EDITOR: C:\\windows\\notepad.exe\r\n  PROMPT: $P$_$C(WORKSPACE_NAME)$F$$$S"
+  # base.ymlのテンプレート
+  when defined(windows):    
+    yaml = "env:\r\n  WORKSPACE_SHELL: start\r\n  WORKSPACE_EDITOR: C:\\windows\\notepad.exe\r\n  PROMPT: $P$_$C(WORKSPACE_NAME)$F$$$S\r\n  HOME: (USERPROFILE)"
     note = ""
   when defined(macosx):
-    root = getEnv(userHome,"undefined") 
-    yaml = "env:\p  WORKSPACE_SHELL: open\p  WORKSPACE_SHELL_ARGS: -na Terminal\p  WORKSPACE_EDITOR: open -na /Applications/TextEdit.app"
+    yaml = "env:\p  WORKSPACE_SHELL: open\p  WORKSPACE_SHELL_ARGS: -na Terminal\p  WORKSPACE_EDITOR: open -e "
   when defined(linux):
-    root = getEnv(userHome,"undefined")
     yaml = "env:\p  WORKSPACE_SHELL: /usr/bin/gnome-terminal\p  WORKSPACE_EDITOR: /usr/bin/gedit"
 
   if root == "undefined" :
     result = 1
-    echo "env '" & userHome & "' was not defined."
+    echo "env '" & USER_HOME & "' was not defined."
     echo "process was aborted."
     return
 
@@ -156,7 +157,7 @@ fi
     root.createDir()
     echo root & " was created."
 
-  # base.ymlを出力
+  # output base.yml
   if (root / "base.yml").existsFile == false:
     if writeText(root / "base.yml", yaml) :
       echo root / "base.yml was created."
@@ -185,5 +186,3 @@ proc showProfiles*() : int =
     let d = f.splitFile
     if d.ext == ".yml":
       echo d.name
-
-
