@@ -122,6 +122,15 @@ proc writeText(fileName:string, text: string) : bool =
     close(f)
   f.writeLine text
 
+proc getDefaultEditor* () : string =
+  when defined(widows):
+    result = r"C:\Windows\notepad.exe"
+  when defined(macosx):
+    result = "open -e "
+  when defined(linux):
+    result = "/usr/bin/gedit"
+
+
 proc createWorkspacesForlder* () : int =
   result = 0
   var root = ""

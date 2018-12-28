@@ -22,7 +22,11 @@ import algorithm
 proc editProfile(path: string, env: StringTableRef ) : int = 
     # プロファイルを読み出し
     let newEnv = readProfile( path & ".yml", env)
-    let editor = env["WORKSPACE_EDITOR"]
+    let editor = if env.hasKey("WORKSPACE_EDITOR") :
+      env["WORKSPACE_EDITOR"]
+    else:
+      getDefaultEditor()
+
     let profilePath = getProfilePath(path & ".yml")
 
     when defined(macosx) :
