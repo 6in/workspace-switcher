@@ -130,7 +130,6 @@ proc getDefaultEditor* () : string =
   when defined(linux):
     result = "/usr/bin/gedit"
 
-
 proc createWorkspacesForlder* () : int =
   result = 0
   var root = ""
