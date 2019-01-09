@@ -1,5 +1,6 @@
 */nimcache/
-bin/test*
+bin/test
 bin/ws
+bin/*.exe
 *.yml
 *.new

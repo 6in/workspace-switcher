@@ -60,7 +60,6 @@ proc main*(args:Table[string,Value]) : int =
 
   var env : StringTableRef = newStringTable()
   if args["--no-inherit"] == false: 
-    echo "no-inherit"
     env = setCurrentEnv(env)
 
   if args["init"] :
@@ -119,9 +118,10 @@ proc main*(args:Table[string,Value]) : int =
       when defined(windows):
         if exec_path.toLower.startsWith("start") :
           for item in env.pairs:
-            # echo fmt"{item.key}={item.value}"
-            # discard c_setenv(item.key & "=" & item.value)
-            putEnv(item.key,item.value)
+            if item.key != "" :
+              echo fmt"[{item.key}]={item.value}"
+              # discard c_setenv(item.key & "=" & item.value)
+              putEnv(item.key,item.value)
           result = os.execShellCmd(exec_path & " " & arguments.join(" "))
           return
 
