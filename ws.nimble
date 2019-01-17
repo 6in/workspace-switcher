@@ -1,7 +1,7 @@
 # Package
 
 packageName   = "ws"
-version       = "0.3.1"
+version       = "0.3.2"
 author        = "input your name"
 description   = "sample app with nimble"
 license       = "MIT"           

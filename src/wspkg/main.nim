@@ -54,6 +54,22 @@ proc addKeyVal(env: var StringTableRef, keyvalues: seq[string]): StringTableRef 
       let v = m.captures[1]
       env[k] = v 
 
+proc splitPathSep(path: string) : seq[string] = 
+  # result = @[]
+  proc sortImpl(x,y:string) : int = 
+    # result = cmp(y.len,x.len)
+    # if result == 0:
+    #   result = cmp(x,y)
+    result = cmp(x.toLower,y.toLower)
+
+  proc cutEndDirSep(file:string) : string =
+    var (p,f) = file.splitPath
+    if f == "":
+      (p,f) = p.splitPath
+    result = p / f
+
+  result = path.split($PathSep).map(cutEndDirSep).sorted(sortImpl).deduplicate
+
 proc main*(args:Table[string,Value]) : int =
   result = 0
   # echo "args=>",args
@@ -142,7 +158,7 @@ proc main*(args:Table[string,Value]) : int =
           "", 
           arguments, 
           env, 
-          {poStdErrToStdOut, poInteractive}
+          {poStdErrToStdOut, poInteractive, poUsePath}
         )
       # result = process.waitForExit(-1)
       process.close
@@ -168,7 +184,7 @@ proc main*(args:Table[string,Value]) : int =
 
       if val.find($PathSep) >= 0:
         echo "  " & key & ":"
-        for p in val.split($PathSep):
+        for p in splitPathSep(val):
           if p != "":
             echo "    - " & p
       else:
@@ -188,7 +204,7 @@ proc main*(args:Table[string,Value]) : int =
 
       f.write fmt"""include:{crlf}  - base{crlf}env:{crlf}  {pathName}:{crlf}"""
 
-      for p in env[pathName].split($PathSep):
+      for p in splitPathSep(env[pathName]):
         if p != "" :
           f.write fmt"    - {p}{crlf}" 
       f.close
@@ -215,7 +231,10 @@ proc main*(args:Table[string,Value]) : int =
 
     # OS毎に環境変数設定を出力
     for key in keys:
-      let val = env[key]
+      var val = env[key]
+      if val.find($PathSep) >= 0:
+        val = splitPathSep(val).join($PathSep)
+
       when defined(windows) :
         echo fmt"SET {key}=""{val}"""
       else:
