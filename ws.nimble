@@ -1,7 +1,7 @@
 # Package
 
 packageName   = "ws"
-version       = "0.3.2"
+version       = "0.3.3"
 author        = "input your name"
 description   = "sample app with nimble"
 license       = "MIT"           
@@ -24,6 +24,7 @@ task run, "アプリケーションを実行します":
 
 task test2, "テスト実行":                  # デフォルトのtestコマンドは、backendの値を参照しない
   # キャッシュファイルをクリア
+  # exec "nimble clean"
   exec "nimble clean"
   # テスト実行開始
   exec "nim " & backend & " -r tests/alltest"
@@ -48,4 +49,3 @@ task rename_test, "リネームテスト用":
   exec "cp -rp . ../ws2"
   exec "nim c -r --out:bin/rename_app util/rename_app.nim ../ws2 " & packageName
   rmDir "../ws2/src/" & packageName & "pkg"
-

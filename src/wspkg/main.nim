@@ -31,7 +31,9 @@ proc editProfile(path: string, env: StringTableRef ) : int =
 
     when defined(macosx) :
       discard execShellCmd(fmt"{editor} {profilePath}")
-
+    when defined(windows) :
+      if editor == "start":
+        discard execShellCmd(fmt"{editor} {profilePath}")
     else:
       let process : Process = startProcess(
           editor, 
@@ -111,12 +113,17 @@ proc main*(args:Table[string,Value]) : int =
 
     var exec_path = ""
     var arguments : seq[string] = @[]
+    var workspaceDir : string = ""
 
     if args["shell"] :
       if env.hasKey("WORKSPACE_SHELL"):
         exec_path = env["WORKSPACE_SHELL"]
       if env.hasKey("WORKSPACE_SHELL_ARGS") :
         arguments = ($env["WORKSPACE_SHELL_ARGS"]).split(re"\s+")
+      if env.hasKey("WORKSPACE_DIR"):
+        workspaceDir = $env["WORKSPACE_DIR"]
+        if workspaceDir.existsDir :
+          workspaceDir.setCurrentDir()
 
     if args["exec"] :
       # コマンドライン解析
@@ -155,7 +162,7 @@ proc main*(args:Table[string,Value]) : int =
 
       let process : Process = startProcess(
           exec_path, 
-          "", 
+          workspaceDir, 
           arguments, 
           env, 
           {poStdErrToStdOut, poInteractive, poUsePath}

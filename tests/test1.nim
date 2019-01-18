@@ -14,12 +14,5 @@ suite "my suite1":
   test "call method1":
     echo "call method1"
     check:
-      say_hello_to("nim") == "{{hello [[nim]]}}"
-      say_hello_to("c") == "{{hello [[c]]}}"
+      true == true
       
-  test "call method2":
-    echo "call method2"
-    check:
-      say_hello_to("nim") == "{{hello [[nim]]}}"
-      say_hello_to("c") == "{{hello [[c]]}}"
-    

@@ -58,7 +58,8 @@ proc remove* (env: StringTableRef, keys: openArray[string]) : StringTableRef =
       result[item.key] = item.value  
 
 proc getWorkspaceFolder() : string = 
-  result = getEnv(USER_HOME,"") / ".workspaces"
+  # result = getEnv(USER_HOME,"") / ".workspaces"
+  result = getHomeDir() / ".workspaces"
 
 proc getProfilePath* (path:string, checkExists: bool = true) : string =
   var root = getCurrentDir()
@@ -124,7 +125,7 @@ proc writeText(fileName:string, text: string) : bool =
 
 proc getDefaultEditor* () : string =
   when defined(widows):
-    result = r"C:\Windows\notepad.exe"
+    result = r"start"
   when defined(macosx):
     result = "open -e "
   when defined(linux):
@@ -140,19 +141,20 @@ if [ "$WORKSPACE_NAME" != "" ]; then
   PROMPT="${PROMPT}
 (${WORKSPACE_NAME})» "
   export PATH=${WORKSPACE_PATH}
-  cd $WORKSPACE_PWD
+  ws test ${WORKSPACE_NAME} > /tmp/${WORKSPACE_NAME}
+  source /tmp/${WORKSPACE_NAME}
 fi
 """
   root = getEnv(USER_HOME,"undefined")
 
   # base.ymlのテンプレート
   when defined(windows):    
-    yaml = "env:\r\n  WORKSPACE_SHELL: start\r\n  WORKSPACE_EDITOR: C:\\windows\\notepad.exe\r\n  PROMPT: $P$_$C(WORKSPACE_NAME)$F$$$S\r\n  HOME: (USERPROFILE)"
+    yaml = "env:\r\n  WORKSPACE_SHELL: start\r\n  WORKSPACE_EDITOR: start\r\n  PROMPT: $P$_$C(WORKSPACE_NAME)$F$$$S\r\n  HOME: (USERPROFILE)"
     note = ""
   when defined(macosx):
     yaml = "env:\p  WORKSPACE_SHELL: open\p  WORKSPACE_SHELL_ARGS: -na Terminal\p  WORKSPACE_EDITOR: open -e "
   when defined(linux):
-    yaml = "env:\p  WORKSPACE_SHELL: /usr/bin/gnome-terminal\p  WORKSPACE_EDITOR: /usr/bin/gedit"
+    yaml = "env:\p  WORKSPACE_SHELL: /usr/bin/gnome-terminal\p  WORKSPACE_EDITOR: xdg-open"
 
   if root == "undefined" :
     result = 1
