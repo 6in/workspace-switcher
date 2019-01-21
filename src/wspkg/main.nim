@@ -31,6 +31,7 @@ proc editProfile(path: string, env: StringTableRef ) : int =
 
     when defined(macosx) :
       discard execShellCmd(fmt"{editor} {profilePath}")
+      return 0
     when defined(windows) :
       if editor == "start":
         discard execShellCmd(fmt"{editor} {profilePath}")
@@ -67,8 +68,12 @@ proc splitPathSep(path: string) : seq[string] =
   proc cutEndDirSep(file:string) : string =
     var (p,f) = file.splitPath
     if f == "":
-      (p,f) = p.splitPath
-    result = p / f
+      result = f
+    if p == "":
+      result = file
+    else:
+      result = p / f
+    #echo fmt"file={file} => {result}"
 
   result = path.split($PathSep).map(cutEndDirSep).sorted(sortImpl).deduplicate
 
@@ -124,6 +129,7 @@ proc main*(args:Table[string,Value]) : int =
         workspaceDir = $env["WORKSPACE_DIR"]
         if workspaceDir.existsDir :
           workspaceDir.setCurrentDir()
+          echo "change directory=>" & workspaceDir
 
     if args["exec"] :
       # コマンドライン解析
