@@ -18,8 +18,10 @@
 * 0.3.3
   * shellコマンドにて、WORKSPACE_DIRという環境変数に定義されているディレクトリが存在したら、カレントディレクトリをそのディレクトリに変更してからターミナルをオープンする
   * デフォルトエディタの設定を変更
-
-
+* 1.0.0
+  * https://github.com/6in/workspace-switcher/issues/1
+  * https://github.com/6in/workspace-switcher/issues/2
+  * https://github.com/6in/workspace-switcher/issues/3
 
 ## ソースからビルド
 

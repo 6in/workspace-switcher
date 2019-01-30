@@ -111,7 +111,10 @@ proc main*(args:Table[string,Value]) : int =
     discard env.addKeyVal kvArgs
 
     # プロファイルを読み出し
+    let profilePath = getProfilePath(path & ".yml")
+
     env = readProfile( path & ".yml",env)
+    env = env.addAppPath
     env = env.remove(@["DEFAULT_PATH"])
 
     env["WORKSPACE_PATH"] = env[pathName]
@@ -144,11 +147,13 @@ proc main*(args:Table[string,Value]) : int =
         discard
 
     if args["test"] == false: 
+      echo "Profile => " & profilePath
+
       when defined(windows):
         if exec_path.toLower.startsWith("start") :
           for item in env.pairs:
             if item.key != "" :
-              echo fmt"[{item.key}]={item.value}"
+              # echo fmt"[{item.key}]={item.value}"
               # discard c_setenv(item.key & "=" & item.value)
               putEnv(item.key,item.value)
           result = os.execShellCmd(exec_path & " " & arguments.join(" "))
@@ -158,13 +163,15 @@ proc main*(args:Table[string,Value]) : int =
         if exec_path.toLower.startsWith("open") :
           for item in env.pairs:
             # echo $item
-            # discard c_setenv(item.key & "=" & item.value)
+            # echo fmt"[{item.key}]={item.value}"
             putEnv($item.key, $item.value)
             #result = os.execShellCmd(exec_path & " " & arguments.join(" ") & " " & os.getCurrentDir())
           result = os.execShellCmd(exec_path & " " & arguments.join(" ") )
           return
 
       echo exec_path & " " & $arguments.join(" ")
+      # for item in env.pairs:
+      #   echo fmt"[{item.key}]={item.value}"
 
       let process : Process = startProcess(
           exec_path, 

@@ -22,6 +22,10 @@ proc dump(yamlDoc:YamlDocument ,file:string, style:PresentationStyle) =
   yamlDoc.dumpDom(s, options= defineOptions(style = style) )
   s.close()
 
+proc addAppPath* (env: StringTableRef ) : StringTableRef =
+  result = env
+  env[pathName] = env[pathName] & PathSep & getAppDir()
+
 proc yaml2json(path: string) : JsonNode =
   ## Yaml to Json
   let fileStream = newFileStream(path,FileMode.fmRead)
