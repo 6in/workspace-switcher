@@ -11,14 +11,6 @@ import strformat
 import sequtils
 import algorithm
 
-# when defined(windows):
-#   proc c_setenv(envstr: cstring): cint {.
-#     importc: "putenv", header: "<stdlib.h>".}
-
-# when defined(macosx):
-#   proc c_setenv(envstr: cstring): cint {.
-#     importc: "putenv", header: "<stdlib.h>".}    
-
 proc editProfile(path: string, env: StringTableRef ) : int = 
     # プロファイルを読み出し
     let newEnv = readProfile( path & ".yml", env)
@@ -41,7 +33,7 @@ proc editProfile(path: string, env: StringTableRef ) : int =
           "", 
           @[profilePath], 
           newEnv, 
-          {poStdErrToStdOut, poInteractive}
+          {poStdErrToStdOut, poInteractive, poUsePath}
       )
       process.close
 
@@ -58,11 +50,7 @@ proc addKeyVal(env: var StringTableRef, keyvalues: seq[string]): StringTableRef 
       env[k] = v 
 
 proc splitPathSep(path: string) : seq[string] = 
-  # result = @[]
   proc sortImpl(x,y:string) : int = 
-    # result = cmp(y.len,x.len)
-    # if result == 0:
-    #   result = cmp(x,y)
     result = cmp(x.toLower,y.toLower)
 
   proc cutEndDirSep(file:string) : string =
@@ -73,7 +61,6 @@ proc splitPathSep(path: string) : seq[string] =
       result = file
     else:
       result = p / f
-    #echo fmt"file={file} => {result}"
 
   result = path.split($PathSep).map(cutEndDirSep).sorted(sortImpl).deduplicate
 
@@ -153,8 +140,6 @@ proc main*(args:Table[string,Value]) : int =
         if exec_path.toLower.startsWith("start") :
           for item in env.pairs:
             if item.key != "" :
-              # echo fmt"[{item.key}]={item.value}"
-              # discard c_setenv(item.key & "=" & item.value)
               putEnv(item.key,item.value)
           result = os.execShellCmd(exec_path & " " & arguments.join(" "))
           return
@@ -162,16 +147,11 @@ proc main*(args:Table[string,Value]) : int =
       when defined(macosx):
         if exec_path.toLower.startsWith("open") :
           for item in env.pairs:
-            # echo $item
-            # echo fmt"[{item.key}]={item.value}"
             putEnv($item.key, $item.value)
-            #result = os.execShellCmd(exec_path & " " & arguments.join(" ") & " " & os.getCurrentDir())
           result = os.execShellCmd(exec_path & " " & arguments.join(" ") )
           return
 
       echo exec_path & " " & $arguments.join(" ")
-      # for item in env.pairs:
-      #   echo fmt"[{item.key}]={item.value}"
 
       let process : Process = startProcess(
           exec_path, 
@@ -180,7 +160,6 @@ proc main*(args:Table[string,Value]) : int =
           env, 
           {poStdErrToStdOut, poInteractive, poUsePath}
         )
-      # result = process.waitForExit(-1)
       process.close
 
   if args["show"] :
@@ -235,12 +214,6 @@ proc main*(args:Table[string,Value]) : int =
       result = editProfile(path,env)
 
   if args["test"] :
-    # let path = $args["<profile>"] 
-    # env["WORKSPACE_NAME"] = path
-    
-    # # プロファイルを読み出し
-    # env = readProfile( path & ".yml",env)
-
     # 環境変数のキー一覧を取得し、ソートする
     var keys : seq[string] = @[]
     for item in env.pairs:
